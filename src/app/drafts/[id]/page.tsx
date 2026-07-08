@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import Header from "@/components/Header";
+import ConflictCompareModal from "@/components/ConflictCompareModal";
 import {
   ALL_TAGS,
   DRAFT_STATUSES,
@@ -47,6 +48,8 @@ export default function EditDraftPage() {
   const [error, setError] = useState<string | null>(null);
   // When set, someone else saved a newer version while we were editing.
   const [conflict, setConflict] = useState<Draft | null>(null);
+  // Controls the side-by-side compare modal (auto-opens on conflict).
+  const [showCompare, setShowCompare] = useState(false);
 
   useEffect(() => {
     let active = true;
@@ -119,6 +122,7 @@ export default function EditDraftPage() {
       if (res.status === 409) {
         const payload = await res.json();
         setConflict(payload.current as Draft);
+        setShowCompare(true); // auto-open the side-by-side comparison
         return;
       }
       if (res.status === 400) {
@@ -137,6 +141,7 @@ export default function EditDraftPage() {
   // Conflict resolution: keep my edits but base them on their version.
   function overwriteTheirs() {
     if (!conflict) return;
+    setShowCompare(false);
     setConflict(null);
     save(conflict.version);
   }
@@ -146,6 +151,7 @@ export default function EditDraftPage() {
     if (!conflict) return;
     setServer(conflict);
     setForm(toForm(conflict));
+    setShowCompare(false);
     setConflict(null);
     setError(null);
   }
@@ -197,21 +203,28 @@ export default function EditDraftPage() {
               {conflict.version}).
             </p>
             <p className="mt-1 text-sm">
-              Their title: <span className="font-medium">{conflict.title}</span>
-              . Your unsaved edits are still in the form below.
+              Your unsaved edits are still in the form. Compare the two versions
+              side by side, then choose how to resolve it.
             </p>
+
             <div className="mt-3 flex flex-wrap gap-2">
               <button
-                onClick={overwriteTheirs}
+                onClick={() => setShowCompare(true)}
                 className="rounded-md bg-primary px-3 py-1.5 text-sm font-medium text-primary-foreground hover:bg-primary/90"
               >
-                Keep my edits &amp; save over theirs
+                Compare changes
+              </button>
+              <button
+                onClick={overwriteTheirs}
+                className="rounded-md border border-primary/40 bg-background px-3 py-1.5 text-sm text-foreground hover:bg-muted"
+              >
+                Keep mine
               </button>
               <button
                 onClick={loadTheirs}
                 className="rounded-md border border-primary/40 bg-background px-3 py-1.5 text-sm text-foreground hover:bg-muted"
               >
-                Discard mine &amp; load their version
+                Load theirs
               </button>
             </div>
           </div>
@@ -333,6 +346,16 @@ export default function EditDraftPage() {
           </div>
         </form>
       </main>
+
+      {showCompare && conflict && (
+        <ConflictCompareModal
+          mine={form}
+          theirs={conflict}
+          onKeepMine={overwriteTheirs}
+          onLoadTheirs={loadTheirs}
+          onClose={() => setShowCompare(false)}
+        />
+      )}
     </>
   );
 }
