@@ -13,34 +13,58 @@ approach.
 
 ## Prerequisites
 
-- Node 20+ and `pnpm`
-- A Postgres connection string (this project uses [Neon](https://neon.tech))
+- **Node 20+** and **pnpm** (`npm i -g pnpm`)
+- A **Postgres** connection string — this project uses [Neon](https://neon.tech)
+  (any Postgres works)
 
-## Setup (one command)
+## Setup
 
-1. Create `.env` in the project root:
+From the project root:
 
-   ```bash
-   DATABASE_URL="postgresql://USER:PASSWORD@HOST/DB?sslmode=require"
-   BETTER_AUTH_SECRET="any-long-random-string"
-   BETTER_AUTH_URL="http://localhost:3000"
-   ```
+### 1. Create `.env`
 
-2. Install, then run the setup command — it generates the Prisma client,
-   creates the tables, and seeds 1,200 drafts + two test users:
+```bash
+# Postgres connection string (Neon or any Postgres)
+DATABASE_URL="postgresql://USER:PASSWORD@HOST/DB?sslmode=require"
 
-   ```bash
-   pnpm install
-   pnpm setup
-   ```
+# Better Auth — SECRET can be any long random string.
+# BETTER_AUTH_URL must match the origin you open the app from.
+BETTER_AUTH_SECRET="any-long-random-string"
+BETTER_AUTH_URL="http://localhost:3000"
+```
 
-3. Start the app:
+> Tip: generate a secret with `openssl rand -base64 32`.
 
-   ```bash
-   pnpm dev
-   ```
+### 2. Install dependencies
 
-   Open <http://localhost:3000>.
+```bash
+pnpm install
+```
+
+This also runs `postinstall` → `prisma generate`, so the Prisma client is ready.
+(If pnpm asks to approve build scripts for Prisma/esbuild, approve them — or it's
+safe to ignore the warning; the app still runs.)
+
+### 3. Create the tables and seed data
+
+```bash
+pnpm setup
+```
+
+`pnpm setup` runs `prisma generate && prisma db push && prisma db seed` — it
+creates every table on your database and loads **1,200 drafts + two test users**.
+The seed is idempotent for users, so it's safe to re-run.
+
+### 4. Start the app
+
+```bash
+pnpm dev
+```
+
+Open <http://localhost:3000> — you'll be redirected to `/login`.
+
+> Restart the dev server after changing `.env`; Next.js reads env vars only at
+> startup.
 
 ## Test accounts
 
