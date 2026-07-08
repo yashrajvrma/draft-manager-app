@@ -10,6 +10,30 @@ polish.
 Stack: Next.js 16 App Router (UI + API route handlers in one process), Prisma 7
 over Neon Postgres, Better Auth for email/password sessions.
 
+## Project structure
+
+Domain concerns live in dedicated top-level folders, addressed via TypeScript
+path aliases (`tsconfig.json`), so they read clearly and don't hide inside
+`src/lib`:
+
+```
+db/           Prisma client singleton (pg driver adapter)   → "@/db"
+schema/       Zod validation schemas                        → "@/schema/*"
+types/        Shared client-facing types + constants        → "@/types"
+data/         seed_drafts.json (the fixed 1,200-record set)
+scripts/      seed-database.ts (run via `prisma db seed`)
+prisma/       schema.prisma
+src/
+  app/        pages + API route handlers
+  components/  Header, ConflictCompareModal
+  lib/        auth.ts, auth-client.ts, session.ts
+  proxy.ts    auth gate (Next.js 16 Middleware → Proxy)
+```
+
+The database seed command is wired into `prisma.config.ts`
+(`migrations.seed = "tsx scripts/seed-database.ts"`), so `prisma db seed` runs
+it.
+
 ## Data model
 
 A single `Draft` table holds the domain data ([prisma/schema.prisma](./prisma/schema.prisma)):
@@ -66,13 +90,26 @@ with a version integer.
 ### Conflict resolution in the UI
 
 On a `409`, the edit page ([src/app/drafts/[id]/page.tsx](./src/app/drafts/%5Bid%5D/page.tsx))
-shows a banner with the newer version and offers two explicit resolutions:
+shows a banner with the newer version and **auto-opens a side-by-side compare
+modal** ([src/components/ConflictCompareModal.tsx](./src/components/ConflictCompareModal.tsx))
+so the user can see exactly what differs before deciding — rather than choosing
+blind. The modal:
+
+- Shows a split **Yours (unsaved) vs Theirs (version N)** view, listing only the
+  fields that actually changed (title / type / status / tags / body).
+- Renders a **word-level diff of the body** (via `jsdiff`): text only in yours is
+  highlighted red (would be lost by loading theirs); text added in their version
+  is highlighted green.
+
+From the banner or the modal footer the user picks one of two explicit
+resolutions:
 
 - **Keep my edits & save over theirs** — re-issue the save based on *their*
   version number, so the user's text wins on top of the latest row.
 - **Discard mine & load their version** — replace the form with the server copy.
 
-The user is never left guessing, and a stale save can never overwrite silently.
+The user is never left guessing, sees precisely what changed, and a stale save
+can never overwrite silently.
 
 ## Optimistic UI with rollback
 
@@ -127,7 +164,13 @@ database**, so a bad payload can't corrupt a record.
 
 Auth routing uses an optimistic cookie check in `src/proxy.ts` (Next.js 16
 renamed Middleware → Proxy) to redirect logged-out users to `/login`;
-authoritative checks still run in each API handler.
+authoritative checks still run in each API handler. The Better Auth client
+([src/lib/auth-client.ts](./src/lib/auth-client.ts)) is configured **without a
+`baseURL`**, so it always calls its own origin — auth requests are same-origin in
+both dev and production and can't hit a CORS wall. On the server,
+`trustedOrigins` lists localhost plus `BETTER_AUTH_URL` so the origin/CSRF check
+passes wherever the app is deployed (that env var must match the origin the app
+is actually served from).
 
 ## What I'd add with more time
 
@@ -138,8 +181,11 @@ authoritative checks still run in each API handler.
 - **Keyset (cursor) pagination** for deep pages — `WHERE (updatedAt, id) < (?, ?)`
   — to avoid large `OFFSET` costs on big datasets. The stable sort key is already
   in place for it.
-- **Optimistic list updates & toasts**, edit history / audit log, and per-field
-  merge on conflict (currently whole-record resolution).
+- **Three-way merge** on conflict — the compare modal already shows a 2-way
+  (yours vs theirs) diff; a true base/yours/theirs merge with per-hunk "take
+  mine / take theirs" would let both people's changes combine into one save
+  instead of whole-record keep-or-discard.
+- **Optimistic list updates & toasts**, and an edit history / audit log.
 - **Tests**: an integration test that fires two concurrent PATCHes at one draft
   and asserts exactly one 200 + one 409, plus paging-coverage tests.
 - **Role-based permissions** and author-scoped editing.

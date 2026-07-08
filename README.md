@@ -54,9 +54,11 @@ approach.
 1. Open the same draft in **two tabs** — e.g. one as Alice, one as Bob
    (use a second browser or an incognito window for the second login).
 2. Edit and **Save** in tab 1 → succeeds, version bumps.
-3. **Save** in tab 2 (still on the old version) → you get a **conflict banner**
-   with the newer version and two choices: *keep my edits & save over theirs*,
-   or *discard mine & load their version*. **Nothing is lost.**
+3. **Save** in tab 2 (still on the old version) → the save is rejected and a
+   **side-by-side compare modal** opens, showing *Yours vs Theirs* with a
+   word-level diff of the body (red = only in yours, green = added in theirs).
+   Resolve with *keep my edits & save over theirs* or *discard mine & load
+   theirs*. **Nothing is lost.**
 
 The list page also polls every few seconds, so other sessions' changes appear
 on their own.
@@ -70,3 +72,21 @@ on their own.
 | `pnpm build`   | Production build                                    |
 | `pnpm db:seed` | Re-seed drafts + users (idempotent for users)       |
 | `pnpm db:push` | Sync the Prisma schema to the database              |
+
+## Project structure
+
+```
+db/           Prisma client singleton            → "@/db"
+schema/       Zod validation schemas             → "@/schema/*"
+types/        Shared types + constants           → "@/types"
+data/         seed_drafts.json (1,200 records)
+scripts/      seed-database.ts (prisma db seed)
+prisma/       schema.prisma
+src/
+  app/        pages + /api route handlers
+  components/  Header, ConflictCompareModal
+  lib/        auth.ts, auth-client.ts, session.ts
+  proxy.ts    auth gate (redirects to /login)
+```
+
+See [`DESIGN.md`](./DESIGN.md) for the full rationale.
