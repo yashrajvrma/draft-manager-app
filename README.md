@@ -1,36 +1,72 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Draft Manager
 
-## Getting Started
+A collaborative content-draft manager built for the WeSee full-stack task.
+Several teammates can browse, search, and edit a shared library of ~1,200 AI
+drafts at once — and **no edit is ever silently lost** when two people save the
+same draft.
 
-First, run the development server:
+Stack: **Next.js 16 (App Router) · TypeScript · Tailwind v4 · Prisma 7 · Neon
+Postgres · Better Auth**.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+See [`DESIGN.md`](./DESIGN.md) for the data model, conflict strategy, and paging
+approach.
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Prerequisites
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- Node 20+ and `pnpm`
+- A Postgres connection string (this project uses [Neon](https://neon.tech))
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Setup (one command)
 
-## Learn More
+1. Create `.env` in the project root:
 
-To learn more about Next.js, take a look at the following resources:
+   ```bash
+   DATABASE_URL="postgresql://USER:PASSWORD@HOST/DB?sslmode=require"
+   BETTER_AUTH_SECRET="any-long-random-string"
+   BETTER_AUTH_URL="http://localhost:3000"
+   ```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+2. Install, then run the setup command — it generates the Prisma client,
+   creates the tables, and seeds 1,200 drafts + two test users:
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+   ```bash
+   pnpm install
+   pnpm setup
+   ```
 
-## Deploy on Vercel
+3. Start the app:
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+   ```bash
+   pnpm dev
+   ```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+   Open <http://localhost:3000>.
+
+## Test accounts
+
+| Email            | Password      |
+| ---------------- | ------------- |
+| `alice@test.com` | `password123` |
+| `bob@test.com`   | `password123` |
+
+## Try the concurrent-edit safety (the core feature)
+
+1. Open the same draft in **two tabs** — e.g. one as Alice, one as Bob
+   (use a second browser or an incognito window for the second login).
+2. Edit and **Save** in tab 1 → succeeds, version bumps.
+3. **Save** in tab 2 (still on the old version) → you get a **conflict banner**
+   with the newer version and two choices: *keep my edits & save over theirs*,
+   or *discard mine & load their version*. **Nothing is lost.**
+
+The list page also polls every few seconds, so other sessions' changes appear
+on their own.
+
+## Scripts
+
+| Command        | What it does                                        |
+| -------------- | --------------------------------------------------- |
+| `pnpm setup`   | `prisma generate` + `prisma db push` + seed         |
+| `pnpm dev`     | Start the dev server                                |
+| `pnpm build`   | Production build                                    |
+| `pnpm db:seed` | Re-seed drafts + users (idempotent for users)       |
+| `pnpm db:push` | Sync the Prisma schema to the database              |
