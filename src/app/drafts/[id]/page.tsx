@@ -29,6 +29,9 @@ function toForm(d: Draft): FormState {
   };
 }
 
+const inputClass =
+  "mt-1 w-full rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground outline-none focus:border-ring focus:ring-2 focus:ring-ring/40";
+
 export default function EditDraftPage() {
   const params = useParams<{ id: string }>();
   const router = useRouter();
@@ -151,7 +154,7 @@ export default function EditDraftPage() {
     return (
       <>
         <Header />
-        <main className="mx-auto w-full max-w-3xl flex-1 px-4 py-10 text-zinc-400">
+        <main className="mx-auto w-full max-w-3xl flex-1 px-4 py-10 text-muted-foreground">
           Loading…
         </main>
       </>
@@ -163,8 +166,8 @@ export default function EditDraftPage() {
       <>
         <Header />
         <main className="mx-auto w-full max-w-3xl flex-1 px-4 py-10">
-          <p className="text-zinc-500">Draft #{id} not found.</p>
-          <Link href="/" className="text-blue-600 hover:underline">
+          <p className="text-muted-foreground">Draft #{id} not found.</p>
+          <Link href="/" className="text-primary hover:underline">
             ← Back to drafts
           </Link>
         </main>
@@ -179,34 +182,34 @@ export default function EditDraftPage() {
       <Header />
       <main className="mx-auto w-full max-w-3xl flex-1 px-4 py-6">
         <div className="mb-4 flex items-center justify-between">
-          <Link href="/" className="text-sm text-blue-600 hover:underline">
+          <Link href="/" className="text-sm text-primary hover:underline">
             ← Back to drafts
           </Link>
-          <span className="text-xs text-zinc-400">
+          <span className="text-xs text-muted-foreground">
             Draft #{server.id} · version {server.version}
           </span>
         </div>
 
         {conflict && (
-          <div className="mb-4 rounded-lg border border-amber-300 bg-amber-50 p-4 dark:border-amber-800 dark:bg-amber-950">
-            <p className="font-medium text-amber-900 dark:text-amber-200">
+          <div className="mb-4 rounded-lg border border-primary/40 bg-accent p-4 text-accent-foreground">
+            <p className="font-medium">
               This draft was updated by someone else (now version{" "}
               {conflict.version}).
             </p>
-            <p className="mt-1 text-sm text-amber-800 dark:text-amber-300">
+            <p className="mt-1 text-sm">
               Their title: <span className="font-medium">{conflict.title}</span>
               . Your unsaved edits are still in the form below.
             </p>
             <div className="mt-3 flex flex-wrap gap-2">
               <button
                 onClick={overwriteTheirs}
-                className="rounded-md bg-amber-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-amber-700"
+                className="rounded-md bg-primary px-3 py-1.5 text-sm font-medium text-primary-foreground hover:bg-primary/90"
               >
                 Keep my edits &amp; save over theirs
               </button>
               <button
                 onClick={loadTheirs}
-                className="rounded-md border border-amber-400 px-3 py-1.5 text-sm text-amber-800 hover:bg-amber-100 dark:text-amber-200 dark:hover:bg-amber-900"
+                className="rounded-md border border-primary/40 bg-background px-3 py-1.5 text-sm text-foreground hover:bg-muted"
               >
                 Discard mine &amp; load their version
               </button>
@@ -215,12 +218,12 @@ export default function EditDraftPage() {
         )}
 
         {error && (
-          <p className="mb-4 rounded-md bg-red-50 px-3 py-2 text-sm text-red-700 dark:bg-red-950 dark:text-red-300">
+          <p className="mb-4 rounded-md bg-destructive/10 px-3 py-2 text-sm text-destructive">
             {error}
           </p>
         )}
         {savedAt && !error && !conflict && (
-          <p className="mb-4 rounded-md bg-green-50 px-3 py-2 text-sm text-green-700 dark:bg-green-950 dark:text-green-300">
+          <p className="mb-4 rounded-md bg-primary/10 px-3 py-2 text-sm text-primary">
             Saved. Now at version {server.version}.
           </p>
         )}
@@ -230,28 +233,28 @@ export default function EditDraftPage() {
             e.preventDefault();
             save(server.version);
           }}
-          className="space-y-4"
+          className="space-y-4 rounded-lg border border-border bg-card p-6 shadow-sm"
         >
           <div>
-            <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+            <label className="block text-sm font-medium text-foreground">
               Title
             </label>
             <input
               value={form.title}
               onChange={(e) => setForm({ ...form, title: e.target.value })}
-              className="mt-1 w-full rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm outline-none focus:border-zinc-500 dark:border-zinc-700 dark:bg-zinc-900"
+              className={inputClass}
             />
           </div>
 
           <div className="flex gap-4">
             <div className="flex-1">
-              <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+              <label className="block text-sm font-medium text-foreground">
                 Type
               </label>
               <select
                 value={form.type}
                 onChange={(e) => setForm({ ...form, type: e.target.value })}
-                className="mt-1 w-full rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900"
+                className={inputClass}
               >
                 {DRAFT_TYPES.map((t) => (
                   <option key={t} value={t}>
@@ -261,13 +264,13 @@ export default function EditDraftPage() {
               </select>
             </div>
             <div className="flex-1">
-              <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+              <label className="block text-sm font-medium text-foreground">
                 Status
               </label>
               <select
                 value={form.status}
                 onChange={(e) => setForm({ ...form, status: e.target.value })}
-                className="mt-1 w-full rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900"
+                className={inputClass}
               >
                 {DRAFT_STATUSES.map((s) => (
                   <option key={s} value={s}>
@@ -279,7 +282,7 @@ export default function EditDraftPage() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+            <label className="block text-sm font-medium text-foreground">
               Tags
             </label>
             <div className="mt-2 flex flex-wrap gap-2">
@@ -290,8 +293,8 @@ export default function EditDraftPage() {
                   onClick={() => toggleTag(t)}
                   className={`rounded-full border px-3 py-1 text-xs ${
                     form.tags.includes(t)
-                      ? "border-blue-500 bg-blue-50 text-blue-700 dark:bg-blue-950 dark:text-blue-300"
-                      : "border-zinc-300 text-zinc-500 dark:border-zinc-700"
+                      ? "border-primary bg-primary text-primary-foreground"
+                      : "border-border text-muted-foreground hover:bg-muted"
                   }`}
                 >
                   {t}
@@ -301,14 +304,14 @@ export default function EditDraftPage() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+            <label className="block text-sm font-medium text-foreground">
               Body
             </label>
             <textarea
               value={form.body}
               onChange={(e) => setForm({ ...form, body: e.target.value })}
               rows={8}
-              className="mt-1 w-full rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm outline-none focus:border-zinc-500 dark:border-zinc-700 dark:bg-zinc-900"
+              className={inputClass}
             />
           </div>
 
@@ -316,14 +319,14 @@ export default function EditDraftPage() {
             <button
               type="submit"
               disabled={saving}
-              className="rounded-md bg-zinc-900 px-4 py-2 text-sm font-medium text-white hover:bg-zinc-800 disabled:opacity-60 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-white"
+              className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-60"
             >
               {saving ? "Saving…" : "Save"}
             </button>
             <button
               type="button"
               onClick={() => router.push("/")}
-              className="rounded-md border border-zinc-300 px-4 py-2 text-sm text-zinc-600 hover:bg-zinc-50 dark:border-zinc-700 dark:text-zinc-400 dark:hover:bg-zinc-900"
+              className="rounded-md border border-border px-4 py-2 text-sm text-muted-foreground hover:bg-muted"
             >
               Cancel
             </button>

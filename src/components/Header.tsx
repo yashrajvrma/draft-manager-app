@@ -15,23 +15,23 @@ export default function Header() {
   }
 
   return (
-    <header className="border-b border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-950">
+    <header className="border-b border-border bg-card">
       <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
-        <Link href="/" className="font-semibold text-zinc-900 dark:text-zinc-50">
+        <Link href="/" className="font-semibold text-card-foreground">
           Draft Manager
         </Link>
         <div className="flex items-center gap-4 text-sm">
           {session?.user && (
-            <span className="text-zinc-500">
+            <span className="text-muted-foreground">
               Signed in as{" "}
-              <span className="font-medium text-zinc-700 dark:text-zinc-300">
+              <span className="font-medium text-foreground">
                 {session.user.email}
               </span>
             </span>
           )}
           <button
             onClick={handleSignOut}
-            className="rounded-md border border-zinc-300 px-3 py-1.5 text-zinc-700 hover:bg-zinc-50 dark:border-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-900"
+            className="rounded-md border border-border px-3 py-1.5 text-foreground hover:bg-muted"
           >
             Sign out
           </button>
