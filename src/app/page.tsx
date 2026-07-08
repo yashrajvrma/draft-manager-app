@@ -8,7 +8,7 @@ import {
   DRAFT_STATUSES,
   DRAFT_TYPES,
   type ListResponse,
-} from "@/lib/types";
+} from "@/types";
 
 const PAGE_SIZE = 20;
 const POLL_MS = 4000;

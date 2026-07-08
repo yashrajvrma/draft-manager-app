@@ -2,8 +2,7 @@
 // Uses the Prisma 7 client generator with a Postgres driver adapter (pg).
 
 generator client {
-  provider = "prisma-client"
-  output   = "../src/generated/prisma"
+  provider = "prisma-client-js"
 }
 
 datasource db {

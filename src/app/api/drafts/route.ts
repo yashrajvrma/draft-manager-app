@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
+import { prisma } from "@/db";
 import { getSession } from "@/lib/session";
-import { listQuerySchema } from "@/lib/validation";
-import type { Prisma } from "@/generated/prisma/client";
+import { listQuerySchema } from "@/schema/validation";
+import type { Prisma } from "@prisma/client";
 
 export async function GET(request: NextRequest) {
   const session = await getSession(request.headers);

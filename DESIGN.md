@@ -119,7 +119,7 @@ REST route handlers under `/api/drafts`:
 
 Every request is **authenticated** — the handler resolves the Better Auth session
 from the request cookies and returns `401` if absent. Every input is validated
-with **Zod** ([src/lib/validation.ts](./src/lib/validation.ts)): query params are
+with **Zod** ([schema/validation.ts](./schema/validation.ts)): query params are
 coerced and bounded (page/pageSize limits, enum-checked `type`/`status`), and the
 update body is fully validated (non-empty title, known enums, tag/body length
 caps). Invalid input returns `400` with details and **never reaches the

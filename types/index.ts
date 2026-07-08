@@ -1,4 +1,4 @@
-import { DRAFT_TYPES, DRAFT_STATUSES } from "./validation";
+import { DRAFT_TYPES, DRAFT_STATUSES } from "@/schema/validation";
 
 export { DRAFT_TYPES, DRAFT_STATUSES };
 

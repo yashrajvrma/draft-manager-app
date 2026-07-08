@@ -9,7 +9,7 @@ import {
   DRAFT_STATUSES,
   DRAFT_TYPES,
   type Draft,
-} from "@/lib/types";
+} from "@/types";
 
 type FormState = {
   title: string;

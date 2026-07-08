@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
+import { prisma } from "@/db";
 import { getSession } from "@/lib/session";
-import { updateDraftSchema } from "@/lib/validation";
+import { updateDraftSchema } from "@/schema/validation";
 
 function parseId(raw: string): number | null {
   const id = Number(raw);

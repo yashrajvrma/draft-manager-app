@@ -1,8 +1,8 @@
 import "dotenv/config";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
-import { prisma } from "../src/lib/prisma";
-import { auth } from "../src/lib/auth";
+import { prisma } from "@/db";
+import { auth } from "@/lib/auth";
 
 type SeedDraft = {
   id: number;
@@ -23,7 +23,7 @@ const TEST_USERS = [
 ];
 
 async function seedDrafts() {
-  const file = join(process.cwd(), "prisma", "data", "seed_drafts.json");
+  const file = join(process.cwd(), "data", "seed_drafts.json");
   const rows = JSON.parse(readFileSync(file, "utf8")) as SeedDraft[];
 
   await prisma.draft.deleteMany();
